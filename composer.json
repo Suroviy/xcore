@@ -1,0 +1,22 @@
+{
+    "name": "suroviy/xcore",
+    "description": "PHP CMS model for Laravel",
+    "keywords": ["laravel", "cms", "model"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alex. Suroviy",
+            "email": "suroviy@bk.ru"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "baum/baum": "~1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Suroviy\\Xcore\\": "src/"
+        }
+    },
+    "minimum-stability": "dev" 
+}
