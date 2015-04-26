@@ -271,4 +271,5 @@ class Menu extends Node
     {
         return $this->makeTitle();;
     }
+
 }

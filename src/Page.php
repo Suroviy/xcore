@@ -1,5 +1,6 @@
 <?php namespace Suroviy\Xcore;
 
+use App\Menu;
 
 use Eloquent;
 use Validator;
@@ -39,10 +40,6 @@ class Page extends Eloquent
         {
             return false;
         }
-
-
-
-
         return parent::save($option);
     }
     
@@ -105,4 +102,29 @@ class Page extends Eloquent
         return \URL::current();
     }
     
+    public function scopeGetParentFromMenu($query, $id = null)
+    {
+        $menu = ($id) ? Menu::find($id) : Menu::getActiveMenu(); 
+        
+        $cildMenus = $menu->descendantsAndSelf()->get();
+        $list = [];
+        $ids = [$menu->id];
+        $ids_not = ($menu->page_id) ? [$menu->page_id] : [];
+        foreach ($cildMenus as $val) 
+        {
+            //echo $val->id.' ';
+            $ids[] = $val->id;
+            if ($val->page_id)
+            {
+                $ids_not[] = $val->page_id;
+            }
+        }
+
+        if (sizeof($ids)>0)
+        {
+            $query->whereIn('menu_id',$ids)->whereNotIn('id',$ids_not);
+        }
+        
+        return $query;
+    }
 }
