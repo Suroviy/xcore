@@ -1,6 +1,7 @@
 <?php namespace Suroviy\Xcore;
 
 use App\Menu;
+use App\PageField;
 
 use Eloquent;
 use Validator;
@@ -11,6 +12,9 @@ class Page extends Eloquent
     static private $_constantModel = null;
     
     public $validator = null;
+    
+    protected $_field = null;
+
 
     public function menu()
     {
@@ -21,6 +25,47 @@ class Page extends Eloquent
     {
     	return $this->hasMany('App\PageField', 'page_id','id');
     }
+    
+    public function getField($key,$default = null)
+    {
+        if (!$this->_field)
+        {
+            foreach ($this->pageField as $val)
+            {
+                $this->_field[$val->key] = $val->value;
+            }
+        }
+        
+        return (isset($this->_field[$key])) ? $this->_field[$key] : $default;
+    }
+    
+    public function setField($fields)
+    {
+        $_fields = array();
+        
+        foreach ($this->pageField as $val)
+        {
+            
+            $val->value = '1';
+            $val->save();
+            
+            if (isset($fields[$val->key]))
+            {
+                $val->value = $fields[$val->key];
+                $val->save();
+                $_fields[$val->key]  = $val;
+            }
+        }
+        
+        foreach ($fields as $key => $val)
+        {
+            if (!isset($_fields[$key]))
+            {
+                PageField::create(['page_id'=>$this->id,'key'=>$key,'value'=>$val]);
+            }
+        }
+    }
+    
   
     public function save (array $option = array())
     {
@@ -46,7 +91,7 @@ class Page extends Eloquent
     
     public function templateName ()
     {
-        $template = Config('digital-code.master.template');
+        $template = Config('lara-cms.master.template');
 
         if (isset($template[$this->template]))
         {
@@ -105,7 +150,7 @@ class Page extends Eloquent
     public function scopeGetParentFromMenu($query, $id = null)
     {
         $menu = ($id) ? Menu::find($id) : Menu::getActiveMenu(); 
-        
+        if (!$menu) return $query;
         $cildMenus = $menu->descendantsAndSelf()->get();
         $list = [];
         $ids = [$menu->id];
